@@ -1,2 +1,7 @@
- ___ Create an SFML Window 
- ___ Render graphics to the screen
+ _X_ Create an SFML Window 
+ _X_ Render graphics to the screen
+ ___ Implement ECS Game Engine //  Entity - Component - System 
+ ___ Implement Entity Manager Class
+ ___ Implement Component Class 
+
+
