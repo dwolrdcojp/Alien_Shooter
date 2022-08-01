@@ -1,0 +1,2 @@
+ ___ Create an SFML Window 
+ ___ Render graphics to the screen
