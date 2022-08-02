@@ -1,7 +1,7 @@
 #include "../include/Common.h"
 #include "../include/Entity.h"
 
-Entity::Entity(const size_t & i, const std::string & t)
+Entity::Entity(const size_t i, const std::string & t)
   : m_id(i), m_tag(t) {}
 
 bool Entity::isActive() const 
@@ -14,7 +14,7 @@ const std::string & Entity::tag() const
   return m_tag;
 }
 
-const size_t & Entity::id() const
+const size_t Entity::id() const
 {
   return m_id;
 }

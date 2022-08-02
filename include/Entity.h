@@ -1,16 +1,21 @@
 #include <iostream>
 #include <string>
+#include "Components.h"
 
 class Entity
 {
 private:
+
+  // EntityManager can construct entities, but no other class can 
+  friend class EntityManager;
+
   // private member variables
   bool        m_active = true;
   size_t      m_id     = 0;
   std::string m_tag    = "default";
 
   // Private constructor so we can't accidently create any entities from outside the class 
-  Entity(const size_t & id, const std::string & tag);
+  Entity(const size_t id, const std::string & tag);
 
 public:
   // public member variables
@@ -24,6 +29,6 @@ public:
   // public member functions
   bool isActive() const;
   const std::string& tag() const;
-  const size_t & id() const;
+  const size_t id() const;
   void destroy();
 };
