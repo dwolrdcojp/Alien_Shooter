@@ -5,9 +5,12 @@ class Entity
 {
 private:
   // private member variables
-  const size_t      m_id    = 0;
-  const std::string m_tag   = "Default";
-  bool              m_active = true;
+  bool        m_active = true;
+  size_t      m_id     = 0;
+  std::string m_tag    = "default";
+
+  // Private constructor so we can't accidently create any entities from outside the class 
+  Entity(const size_t & id, const std::string & tag);
 
 public:
   // public member variables
@@ -19,9 +22,8 @@ public:
   std::shared_ptr<CLifespan>  cLifespan;
   
   // public member functions
-  Entity(const std::string& tag, size_t id);
-  void destroy() { m_active = false; }
-  bool isActive() { return m_active; }
-  const std::string& tag() { return m_tag; }
-  size_t id() { return m_id; }
+  bool isActive() const;
+  const std::string& tag() const;
+  const size_t & id() const;
+  void destroy();
 };
