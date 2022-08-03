@@ -8,6 +8,19 @@ struct PlayerConfig { int SR, CR, FR, FG, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
 struct BulletConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
 
+/*
+   Bullet Config
+    -----------
+    Shape Radius        SR            int
+    Collision Radius    CR            int 
+    Speed               S             float 
+    Fill Color          FR, FG, FB    int, int, int    
+    Outline Color       OR, OG, OB    int, int, int 
+    Outline Thickness   OT            int 
+    Shape Vertices      V             int 
+    Lifespan            L             int 
+*/
+
 class Game
 {
 
