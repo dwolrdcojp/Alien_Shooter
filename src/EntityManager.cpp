@@ -1,10 +1,25 @@
 #include "../include/EntityManager.h"
 
+void EntityManager::removeDeadEntities(EntityVec & vec) 
+{
+  // TODO
+  // Remove all dead entities from the input vector
+  // This is called by the update() function 
+  // Avoid iterator invalidation
+  auto it = vec.begin();
+  for(it; it != vec.end(); it++)
+  {
+    if(!it->get()->isActive()) 
+    {
+      it = vec.erase(it);
+    }
+  }
+}
+
 EntityManager::EntityManager()
 {
 
 }
-
 
 void EntityManager::update()
 {
@@ -32,14 +47,6 @@ void EntityManager::update()
 
 }
 
-void EntityManager::removeDeadEntities(EntityVec & vec) 
-{
-  // TODO
-  // Remove all dead entities from the input vector
-  // This is called by the update() function 
-  // Avoid iterator invalidation
-}
-
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
 {
   // Implement this function so that entities are added to the m_entitiesToAdd vector here
@@ -52,6 +59,8 @@ std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
 
   return entity;
 }
+
+
 
 const EntityVec & EntityManager::getEntities() 
 {
