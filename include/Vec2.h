@@ -1,5 +1,6 @@
 // Custom Vec2 Class
 #pragma once 
+#include <iostream>
 
 class Vec2
 {
@@ -23,5 +24,9 @@ public:
   void operator -= (const Vec2 & rhs);
   void operator *= (const float val);
   void operator /= (const float val);
-
+  
+  void normalize();
+  Vec2 dist(Vec2& vec);
+  
+  friend std::ostream& operator << (std::ostream& os, const Vec2& vc);
 };

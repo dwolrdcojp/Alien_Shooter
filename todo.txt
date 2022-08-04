@@ -1,9 +1,9 @@
  _X_ Create an SFML Window 
  _X_ Render graphics to the screen
- ___ Implement the Vec2 class, which you will use for all Components 
+ _X_ Implement the Vec2 class, which you will use for all Components 
  ___ Implement Delayed entity add() to solve iterator invalidation
  ___ Save the configuration file reading until later, after entities implemented 
- ___ Test all the functions of the Vec2 class before moving on
+ _X_ Test all the functions of the Vec2 class before moving on
  ___ Implement basic functionality in the EntityManager class
      Implement the EntityManager's addEntity() and update() functions so 
      you can start testing the Game class quickly. Don't worry about the update() 

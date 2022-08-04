@@ -40,12 +40,12 @@ void Game::run()
 
     if(!m_paused)
     {
-      sEnemySpawner();
-      sMovement();
-      sCollision();
+      // sEnemySpawner();
+      // sMovement();
+      // sCollision();
     }
       // if paused only run these systems  
-      sUserInput();
+      // sUserInput();
       sRender();
     // increment the current frame 
     // may need to be moved when pause implemented 
@@ -175,8 +175,8 @@ void Game::sCollision()
     for (auto e : m_entities.getEntities("enemy"))
     {
       // if there's a collision between pe, and e 
-      float dist = p->cTransform->pos.dist(e->cTransform->pos);
-      p->cCollision->radius;
+      // float dist = p->cTransform->pos.dist(e->cTransform->pos);
+      // p->cCollision->radius;
     }
   }
 }
@@ -188,14 +188,14 @@ void Game::sRender()
   m_window.clear();
 
   // Set the position of the shape based on the entity's transform->pos 
-  m_player->cShape->circle.setPosition(m_player->cTransform->pos.x, m_player.->cTransform->pos.y);
+  m_player->cShape->circle.setPosition(m_player->cTransform->pos.x, m_player->cTransform->pos.y);
 
   // Set the rotation of the shape based on the entity's transform angle 
   m_player->cTransform->angle += 1.0f;
   m_player->cShape->circle.setRotation(m_player->cTransform->angle);
 
   // Draw the entity's sf::CircleShape
-  m_window.draw(m_player->cShape->cirle);
+  m_window.draw(m_player->cShape->circle);
 
   m_window.display();
 }

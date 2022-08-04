@@ -41,7 +41,7 @@ private:
   bool             m_running = true;     // whether the game is running 
 
   std::shared_ptr<Entity> m_player;
-
+/
   // Private member functions
   void init(const std::string & config); // initialize the GameState with a config file path
   void setPaused(bool paused);           // Pause the game 
