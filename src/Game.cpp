@@ -1,3 +1,4 @@
+#include <cmath>
 #include "../include/Common.h"
 #include "../include/Game.h"
 
@@ -123,6 +124,32 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   // -- bullet speed is given as a scalar speed 
   // -- you must set the velocity by using formula in notes
   // bring in all the of the BulletConfig attributes from the bullet config file 
+  m_bulletConfig.SR = 10;
+  m_bulletConfig.CR = 2;
+  m_bulletConfig.S = 1.0f;
+  m_bulletConfig.FR = 255;
+  m_bulletConfig.FG = 0;
+  m_bulletConfig.FB = 0;
+  m_bulletConfig.OR = 0;
+  m_bulletConfig.OG = 255;
+  m_bulletConfig.OB = 0;
+  m_bulletConfig.V = 20;
+  m_bulletConfig.L = 180;
+  
+  Vec2 player_pos = Vec2(entity->cTransform->pos.x, entity->cTransform->pos.y);
+
+  Vec2 t = target;
+  Vec2 velocity = t.dist(player_pos); 
+  velocity.normalize();
+  auto bullet = m_entities.addEntity("bullet");
+
+  // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
+  bullet->cTransform = std::make_shared<CTransform>(player_pos, velocity, 0.0f);
+
+  // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+  bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
+        sf::Color(m_bulletConfig.FR, m_bulletConfig.FG, m_bulletConfig.FB),  
+        sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
 
 }
 
@@ -302,6 +329,7 @@ void Game::sUserInput()
         {
           std::cout << "id: " << e->id() << " tag: " << e->tag() << std::endl;
         }
+        spawnBullet(m_player, Vec2(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
         // call spawnBullet here 
       }
 
