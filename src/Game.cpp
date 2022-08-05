@@ -1,3 +1,4 @@
+#include "../include/Common.h"
 #include "../include/Game.h"
 
 Game::Game(const std::string & config)
@@ -26,6 +27,7 @@ void Game::init(const std::string & config)
   m_window.setFramerateLimit(60);
 
   spawnPlayer();
+  spawnEnemy();
   spawnEnemy();
 
 };
@@ -91,6 +93,7 @@ void Game::spawnEnemy()
 
   // record when the most recent enemy was spawned 
   m_lastEnemySpawnTime = m_currentFrame; 
+
 }
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> e) 
@@ -295,6 +298,10 @@ void Game::sUserInput()
       {
         std::cout << "Left Mouse Button Clicked at (" << event.mouseButton.x << ", " 
                                                       << event.mouseButton.y << ")\n";
+        for (auto e : m_entities.getEntities())
+        {
+          std::cout << "id: " << e->id() << " tag: " << e->tag() << std::endl;
+        }
         // call spawnBullet here 
       }
 
@@ -302,6 +309,8 @@ void Game::sUserInput()
       {
         std::cout << "Right Mouse Button Clicked at (" << event.mouseButton.x << ", "
                                                        << event.mouseButton.y << ")\n";
+        auto entities = m_entities.getEntities();
+        entities.back()->destroy();
         // call spawnSpecialWeapon here
       }
     }

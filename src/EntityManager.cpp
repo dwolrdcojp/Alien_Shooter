@@ -2,16 +2,13 @@
 
 void EntityManager::removeDeadEntities(EntityVec & vec) 
 {
-  // TODO
-  // Remove all dead entities from the input vector
-  // This is called by the update() function 
   // Avoid iterator invalidation
-  auto it = vec.begin();
-  for(it; it != vec.end(); it++)
+  for(auto it = vec.begin(); it != vec.end(); it++)
   {
     if(!it->get()->isActive()) 
     {
-      it = vec.erase(it);
+      vec.erase(it);
+      it = vec.begin();
     }
   }
 }
@@ -69,7 +66,6 @@ const EntityVec & EntityManager::getEntities()
 
 const EntityVec & EntityManager::getEntities(const std::string & tag)
 {
-  // TODO: this is incorrect, return the correct vector from the map 
-  return m_entities;
+  return m_entityMap[tag];
 }
 
