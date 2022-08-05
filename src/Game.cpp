@@ -12,20 +12,21 @@ Game::Game(const std::string & config)
      */
 }
 
-void Game::init(const std::string & path)
+void Game::init(const std::string & config)
 {
   // TODO: Read in config file here 
   //       use the premade PlayerConfig, EnemyConfig, BulletConfig variables
   
   // Read in the window size 
-  std::ifstream fin(path);
+  //std::ifstream fin(path);
   
-   fin >> m_playerConfig.SR >> m_playerConfig.CR >> m_playerConfig.S;
+  // fin >> m_playerConfig.SR >> m_playerConfig.CR >> m_playerConfig.S;
   // set up default window parameters
   m_window.create(sf::VideoMode(1280, 720), "Alien Shooter");
   m_window.setFramerateLimit(60);
 
   spawnPlayer();
+  spawnEnemy();
 
 };
 
@@ -41,11 +42,11 @@ void Game::run()
     if(!m_paused)
     {
       // sEnemySpawner();
-      // sMovement();
       // sCollision();
     }
       // if paused only run these systems  
-      // sUserInput();
+      sUserInput();
+      sMovement();
       sRender();
     // increment the current frame 
     // may need to be moved when pause implemented 
@@ -79,6 +80,14 @@ void Game::spawnEnemy()
 {
   // TODO: make sure the enemy is spawned properly with the m_enemyConfig variables
   //       the enemy must be spawned completely within the bounds of the window 
+
+  auto entity = m_entities.addEntity("enemy");
+
+  // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
+  entity->cTransform = std::make_shared<CTransform>(Vec2(400.0f, 400.0f), Vec2(0.0f, 0.0f), 0.0f);
+
+  // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+  entity->cShape = std::make_shared<CShape>(32.0f, 4, sf::Color(10, 10, 10), sf::Color(0, 255, 0), 5.0f);
 
   // record when the most recent enemy was spawned 
   m_lastEnemySpawnTime = m_currentFrame; 
@@ -124,6 +133,8 @@ void Game::sMovement()
   // TODO: Implement all entity movement in this function 
   // you should read the m_player->cInput component to determine if the player is moving 
   Vec2 playerVelocity;
+  m_playerConfig.S = 0.1f;
+
   if (m_player->cInput->left)
   {
     playerVelocity.x -= m_playerConfig.S;
@@ -196,6 +207,10 @@ void Game::sRender()
 
   // Draw the entity's sf::CircleShape
   m_window.draw(m_player->cShape->circle);
+  // Draw enemies 
+  auto enemy = m_entities.getEntities().back(); 
+  enemy->cShape->circle.setPosition(enemy->cTransform->pos.x, enemy->cTransform->pos.y);
+  m_window.draw(enemy->cShape->circle);
 
   m_window.display();
 }
@@ -224,6 +239,25 @@ void Game::sUserInput()
         case sf::Keyboard::W:
           std::cout << "W Key Pressed\n";
           // TODO: set player's input component "up" variable to true 
+          m_player->cInput->up = true;
+          break;
+
+        case sf::Keyboard::S:
+          std::cout << "S Key Pressed\n";
+          // TODO: set player's input component "up" variable to true 
+          m_player->cInput->down = true;
+          break;
+
+        case sf::Keyboard::A:
+          std::cout << "A Key Pressed\n";
+          // TODO: set player's input component "up" variable to true 
+          m_player->cInput->left = true;
+          break;
+
+        case sf::Keyboard::D:
+          std::cout << "D Key Pressed\n";
+          // TODO: set player's input component "up" variable to true 
+          m_player->cInput->right = true;
           break;
       }
     }
@@ -235,7 +269,22 @@ void Game::sUserInput()
       {
         case sf::Keyboard::W:
           std::cout << "W Key Released\n";
-          // TODO: set player's input component "up" variable to false 
+          m_player->cInput->up = false;
+          break;
+
+        case sf::Keyboard::S:
+          std::cout << "S Key Released\n";
+          m_player->cInput->down = false;
+          break;
+
+        case sf::Keyboard::A:
+          std::cout << "A Key Released\n";
+          m_player->cInput->left = false;
+          break;
+
+        case sf::Keyboard::D:
+          std::cout << "D Key Released\n";
+          m_player->cInput->right = false;
           break;
       }
     }

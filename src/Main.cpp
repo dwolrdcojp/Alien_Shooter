@@ -3,8 +3,8 @@
 
 int main()
 {
-  // Game g("config.txt");
-  // g.run();
+  Game g("config.txt");
+  g.run();
 
   Vec2 point1(1.0, 2.0);
   Vec2 point2(2.0, 4.0);
