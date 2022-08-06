@@ -125,26 +125,29 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   // -- you must set the velocity by using formula in notes
   // bring in all the of the BulletConfig attributes from the bullet config file 
   m_bulletConfig.SR = 10;
-  m_bulletConfig.CR = 2;
-  m_bulletConfig.S = 1.0f;
+  m_bulletConfig.CR = 10;
+  m_bulletConfig.S = 20.0f;
   m_bulletConfig.FR = 255;
-  m_bulletConfig.FG = 0;
-  m_bulletConfig.FB = 0;
-  m_bulletConfig.OR = 0;
+  m_bulletConfig.FG = 255;
+  m_bulletConfig.FB = 255;
+  m_bulletConfig.OR = 255;
   m_bulletConfig.OG = 255;
-  m_bulletConfig.OB = 0;
+  m_bulletConfig.OB = 255;
   m_bulletConfig.V = 20;
-  m_bulletConfig.L = 180;
+  m_bulletConfig.L = 90;
   
-  Vec2 player_pos = Vec2(entity->cTransform->pos.x, entity->cTransform->pos.y);
-
-  Vec2 t = target;
-  Vec2 velocity = t.dist(player_pos); 
-  velocity.normalize();
+  // Calculate the velocity vector for the bullet based on mouse position relative to the player 
+  Vec2 D(target.x - entity->cTransform->pos.x, target.y - entity->cTransform->pos.y);
+  std::cout << "D: " << D << std::endl;
+  D.normalize();
+  Vec2 N = D;
+  N *= m_bulletConfig.S;
+  Vec2 velocity = N;
+  
   auto bullet = m_entities.addEntity("bullet");
 
   // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-  bullet->cTransform = std::make_shared<CTransform>(player_pos, velocity, 0.0f);
+  bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
   bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
@@ -226,22 +229,16 @@ void Game::sRender()
 {
   // TODO: change the code below to draw all of the Entities
   // sample drawing of the player Entity we have created 
-  m_window.clear();
-
-  // Set the position of the shape based on the entity's transform->pos 
-  m_player->cShape->circle.setPosition(m_player->cTransform->pos.x, m_player->cTransform->pos.y);
-
-  // Set the rotation of the shape based on the entity's transform angle 
-  m_player->cTransform->angle += 1.0f;
-  m_player->cShape->circle.setRotation(m_player->cTransform->angle);
-
-  // Draw the entity's sf::CircleShape
-  m_window.draw(m_player->cShape->circle);
+  // set the players rotation angle to change on each update
+  m_player->cTransform->angle += 5.0f;
   // Draw enemies 
-  auto enemy = m_entities.getEntities().back(); 
-  enemy->cShape->circle.setPosition(enemy->cTransform->pos.x, enemy->cTransform->pos.y);
-  m_window.draw(enemy->cShape->circle);
-
+  m_window.clear();
+  for (auto e : m_entities.getEntities())
+  {
+    e->cShape->circle.setPosition(e->cTransform->pos.x, e->cTransform->pos.y);
+    e->cShape->circle.setRotation(e->cTransform->angle);
+    m_window.draw(e->cShape->circle);
+  }
   m_window.display();
 }
 
@@ -325,11 +322,13 @@ void Game::sUserInput()
       {
         std::cout << "Left Mouse Button Clicked at (" << event.mouseButton.x << ", " 
                                                       << event.mouseButton.y << ")\n";
-        for (auto e : m_entities.getEntities())
-        {
-          std::cout << "id: " << e->id() << " tag: " << e->tag() << std::endl;
-        }
-        spawnBullet(m_player, Vec2(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y));
+        // for (auto e : m_entities.getEntities())
+        // {
+        //  std::cout << "id: " << e->id() << " tag: " << e->tag() << std::endl;
+        // }
+
+        Vec2 mouse_pos(event.mouseButton.x, event.mouseButton.y);
+        spawnBullet(m_player, mouse_pos);
         // call spawnBullet here 
       }
 
@@ -337,7 +336,7 @@ void Game::sUserInput()
       {
         std::cout << "Right Mouse Button Clicked at (" << event.mouseButton.x << ", "
                                                        << event.mouseButton.y << ")\n";
-        auto entities = m_entities.getEntities();
+        auto entities = m_entities.getEntities("enemy");
         entities.back()->destroy();
         // call spawnSpecialWeapon here
       }
