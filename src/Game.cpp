@@ -1,4 +1,6 @@
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 #include "../include/Common.h"
 #include "../include/Game.h"
 
@@ -24,8 +26,19 @@ void Game::init(const std::string & config)
   
   // fin >> m_playerConfig.SR >> m_playerConfig.CR >> m_playerConfig.S;
   // set up default window parameters
-  m_window.create(sf::VideoMode(1280, 720), "Alien Shooter");
-  m_window.setFramerateLimit(60);
+
+  std::ifstream fin(config);
+
+  std::string name;
+  int x, y, fps;
+  
+  while (fin >> name)
+  {
+    fin >> x >> y >> fps;
+  }
+
+  m_window.create(sf::VideoMode(x, y), "Alien Shooter");
+  m_window.setFramerateLimit(fps);
 
   spawnPlayer();
   spawnEnemy();
@@ -63,13 +76,24 @@ void Game::spawnPlayer()
   //       Then use those in the constructor of the player components 
   // We create every entity by calling EntityManager.addEntity(tag) 
   // This returns a std::shared_ptr<Entity>, so we use 'auto' to save typing 
+  std::ifstream fin("../assets/config/player.txt");
+
+  std::string name;
+  PlayerConfig pc;
+  
+  while (fin >> name)
+  {
+    fin >> pc.SR >> pc.CR >> pc.FR >> pc.FG >> pc.FB >> pc.OR >> pc.OG >> pc.OB >> pc.OT >> pc.V >> pc.S; 
+  }
   auto entity = m_entities.addEntity("player");
 
   // Give this entity a Transform so it spawns at (200, 200) with velocity of (1, 1) and angle 0 
   entity->cTransform = std::make_shared<CTransform>(Vec2(200.0f, 200.0f), Vec2(1.0f, 1.0f), 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-  entity->cShape = std::make_shared<CShape>(32.0f, 8, sf::Color(10, 10, 10), sf::Color(255, 0, 0), 4.0f);
+  entity->cShape = std::make_shared<CShape>(pc.SR, pc.V, 
+      sf::Color(pc.FR, pc.FG, pc.FB), 
+      sf::Color(pc.OR, pc.OG, pc.OB), pc.OT);
 
   // Add an input component to the player so that we can use inputs 
   entity->cInput = std::make_shared<CInput>();
@@ -84,16 +108,42 @@ void Game::spawnEnemy()
   // TODO: make sure the enemy is spawned properly with the m_enemyConfig variables
   //       the enemy must be spawned completely within the bounds of the window 
 
-  auto entity = m_entities.addEntity("enemy");
+  // EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
+  std::ifstream fin("../assets/config/enemy.txt");
 
-  // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-  entity->cTransform = std::make_shared<CTransform>(Vec2(400.0f, 400.0f), Vec2(0.0f, 0.0f), 0.0f);
+  std::string name;
+  EnemyConfig ec;
+  std::vector<EnemyConfig> enemies;
+  // Read in enemy data from enemy config
+  // Store each struct of enemy config data in a vector enemies
+  while (fin >> name)
+  {
+    fin >> ec.SR >> ec.CR >> ec.OR >> ec.OG >> ec.OB >> ec.OT >> 
+      ec.VMIN >> ec.VMAX >> ec.L >> ec.SI >> ec.SMIN >> ec.SMAX;
+    enemies.push_back(ec);
+  }
 
-  // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-  entity->cShape = std::make_shared<CShape>(32.0f, 4, sf::Color(10, 10, 10), sf::Color(0, 255, 0), 5.0f);
+  std::srand(std::time(0));
 
-  // record when the most recent enemy was spawned 
-  m_lastEnemySpawnTime = m_currentFrame; 
+  // Add enemey entities and construct properties & by the number of enemies in the enemy config data 
+  for (auto e : enemies)
+  {
+    auto entity = m_entities.addEntity("enemy");
+
+    float rand_num = (std::rand() % 720);
+
+    // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
+    entity->cTransform = std::make_shared<CTransform>(Vec2(rand_num, rand_num), Vec2(0.0f, 0.0f), 0.0f);
+
+    // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+    entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
+        sf::Color(0, 0, 0), 
+        sf::Color(e.OR, e.OG, e.OB), e.OT);
+
+    // record when the most recent enemy was spawned 
+    m_lastEnemySpawnTime = m_currentFrame; 
+
+  }
 
 }
 
@@ -124,24 +174,24 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   // -- bullet speed is given as a scalar speed 
   // -- you must set the velocity by using formula in notes
   // bring in all the of the BulletConfig attributes from the bullet config file 
-  m_bulletConfig.SR = 10;
-  m_bulletConfig.CR = 10;
-  m_bulletConfig.S = 20.0f;
-  m_bulletConfig.FR = 255;
-  m_bulletConfig.FG = 255;
-  m_bulletConfig.FB = 255;
-  m_bulletConfig.OR = 255;
-  m_bulletConfig.OG = 255;
-  m_bulletConfig.OB = 255;
-  m_bulletConfig.V = 20;
-  m_bulletConfig.L = 90;
+  // 
+   // Bullet 10 10 20 255 255 255 255 255 255 20 90
+  std::ifstream fin("../assets/config/bullet.txt");
+
+  std::string name;
+  BulletConfig b;
+  
+  while (fin >> name)
+  {
+    fin >> b.SR >> b.CR >> b.S >> b.FR >> b.FG >> b.FB >> b.OR >> b.OG >> b.OB >> b.OT >> b.V >> b.L;
+  }
   
   // Calculate the velocity vector for the bullet based on mouse position relative to the player 
   Vec2 D(target.x - entity->cTransform->pos.x, target.y - entity->cTransform->pos.y);
   std::cout << "D: " << D << std::endl;
   D.normalize();
   Vec2 N = D;
-  N *= m_bulletConfig.S;
+  N *= b.S;
   Vec2 velocity = N;
   
   auto bullet = m_entities.addEntity("bullet");
@@ -150,9 +200,9 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-  bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
-        sf::Color(m_bulletConfig.FR, m_bulletConfig.FG, m_bulletConfig.FB),  
-        sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
+  bullet->cShape = std::make_shared<CShape>(b.SR, b.V, 
+        sf::Color(b.FR, b.FG, b.FB),  
+        sf::Color(b.OR, b.OG, b.OB), b.OT);
 
 }
 

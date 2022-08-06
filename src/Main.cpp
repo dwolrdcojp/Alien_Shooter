@@ -3,7 +3,7 @@
 
 int main()
 {
-  Game g("config.txt");
+  Game g("../assets/config/config.txt");
   g.run();
 }
 
