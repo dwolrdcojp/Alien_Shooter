@@ -68,15 +68,15 @@ void Vec2::operator /= (const float val)
 }
 void Vec2::normalize() 
 {
-  float w = sqrt((x * x) + (y * y));
-  x /= w;
-  y /= w;
+  double L = length();
+  x = x / L;
+  y = y / L;
 }
 
-Vec2 Vec2::dist(Vec2& vec)
+double Vec2::length()
 {
-  Vec2 vector = *this - vec;
-  return vector;
+  double L = sqrtf((x*x) + (y*y));
+  return L;
 }
 
 std::ostream& operator << (std::ostream& os, const Vec2& vc)

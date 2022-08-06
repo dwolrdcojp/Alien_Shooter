@@ -26,7 +26,7 @@ public:
   void operator /= (const float val);
   
   void normalize();
-  Vec2 dist(Vec2& vec);
+  double length();
   
   friend std::ostream& operator << (std::ostream& os, const Vec2& vc);
 };
