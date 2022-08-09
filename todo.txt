@@ -2,20 +2,20 @@
  _X_ Render graphics to the screen
  _X_ Implement the Vec2 class, which you will use for all Components 
  _X_ Implement Delayed entity add() to solve iterator invalidation
- ___ Save the configuration file reading until later, after entities implemented 
+ _X_ Save the configuration file reading until later, after entities implemented 
  _X_ Test all the functions of the Vec2 class before moving on
  _X_ Implement basic functionality in the EntityManager class
      Implement the EntityManager's addEntity() and update() functions so 
      you can start testing the Game class quickly. Don't worry about the update() 
      function which deletes dead entities until later when you get more game mechanics working 
- ___ Implement basics of the Game class:
+ _X_ Implement basics of the Game class:
  _X_ a. Construct a player Entity using the spawnPlayer() function 
  _X_ b. Implement basic drawing of entities using the Game::sRender() function 
  _X_ c. Construct some enemies using the spawnEnemy() function 
- ___ d. Construct a bullet using the spawnBullet() function 
+ _X_ d. Construct a bullet using the spawnBullet() function 
  _X_ Implement Player Movement in Game::sUserInput and Game::sMovement 
  _X_ Implement the EntityManager::update() function so it deletes dead entities 
  _X_ Implement the EntityManager::getEntities(tag) functionality 
  ___ Implement collisions in sCollision and entity.destroy() if it's dead 
- ___ Implement the rest of the game's functionality, including config file reading 
+ _X_ Implement the rest of the game's functionality, including config file reading 
  ___ Implement Game Scenes

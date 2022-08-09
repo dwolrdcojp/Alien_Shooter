@@ -38,10 +38,9 @@ void Game::init(const std::string & config)
   }
 
   m_window.create(sf::VideoMode(x, y), "Alien Shooter");
-  m_window.setFramerateLimit(fps);
+  m_window.setFramerateLimit(60);
 
   spawnPlayer();
-  spawnEnemy();
   spawnEnemy();
 
 };
@@ -58,18 +57,18 @@ void Game::run()
     if(!m_paused)
     {
       // sEnemySpawner();
-      // sCollision();
     }
       // if paused only run these systems  
-      sUserInput();
       sMovement();
+      sCollision();
+      sUserInput();
+      sLifespan();
       sRender();
     // increment the current frame 
     // may need to be moved when pause implemented 
     m_currentFrame++;
   }
 }
-
 void Game::spawnPlayer()
 {
   // TODO: Finish adding all the properties of the player with the correct values from the config 
@@ -79,24 +78,27 @@ void Game::spawnPlayer()
   std::ifstream fin("../assets/config/player.txt");
 
   std::string name;
-  PlayerConfig pc;
   
   while (fin >> name)
   {
-    fin >> pc.SR >> pc.CR >> pc.FR >> pc.FG >> pc.FB >> pc.OR >> pc.OG >> pc.OB >> pc.OT >> pc.V >> pc.S; 
+    fin >> m_playerConfig.SR >> m_playerConfig.CR >> m_playerConfig.FR >> m_playerConfig.FG >> m_playerConfig.FB >> m_playerConfig.OR >> m_playerConfig.OG 
+        >> m_playerConfig.OB >> m_playerConfig.OT >> m_playerConfig.V >> m_playerConfig.S; 
   }
   auto entity = m_entities.addEntity("player");
 
   // Give this entity a Transform so it spawns at (200, 200) with velocity of (1, 1) and angle 0 
-  entity->cTransform = std::make_shared<CTransform>(Vec2(200.0f, 200.0f), Vec2(1.0f, 1.0f), 0.0f);
+  entity->cTransform = std::make_shared<CTransform>(Vec2(200.0f, 200.0f), Vec2(0.0f, 0.0f), 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-  entity->cShape = std::make_shared<CShape>(pc.SR, pc.V, 
-      sf::Color(pc.FR, pc.FG, pc.FB), 
-      sf::Color(pc.OR, pc.OG, pc.OB), pc.OT);
+  entity->cShape = std::make_shared<CShape>(m_playerConfig.SR, m_playerConfig.V, 
+      sf::Color(m_playerConfig.FR, m_playerConfig.FG, m_playerConfig.FB), 
+      sf::Color(m_playerConfig.OR, m_playerConfig.OG, m_playerConfig.OB), m_playerConfig.OT);
 
   // Add an input component to the player so that we can use inputs 
   entity->cInput = std::make_shared<CInput>();
+
+  // Add a collision component to player so we can detect collisions with other enemies
+  entity->cCollision = std::make_shared<CCollision>(m_playerConfig.SR);
 
   // Since we want this Entity to be our player, set our Game's player variable to be this Entity 
   // This goes slightly against the EntityManager paradigm, but we use the player so much it's worth it 
@@ -130,15 +132,19 @@ void Game::spawnEnemy()
   {
     auto entity = m_entities.addEntity("enemy");
 
-    float rand_num = (std::rand() % 720);
+    float rand_num_x = (std::rand() % 1280);
+    float rand_num_y = (std::rand() % 720);
 
     // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-    entity->cTransform = std::make_shared<CTransform>(Vec2(rand_num, rand_num), Vec2(0.0f, 0.0f), 0.0f);
+    entity->cTransform = std::make_shared<CTransform>(Vec2(rand_num_x, rand_num_y), Vec2(0.1f, 0.1f), 0.0f);
 
     // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
     entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
         sf::Color(0, 0, 0), 
         sf::Color(e.OR, e.OG, e.OB), e.OT);
+
+    // Give the enemies a collision component so that we can detetc collision with the player and bullets
+    entity->cCollision = std::make_shared<CCollision>(e.SR);    
 
     // record when the most recent enemy was spawned 
     m_lastEnemySpawnTime = m_currentFrame; 
@@ -179,11 +185,11 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   std::ifstream fin("../assets/config/bullet.txt");
 
   std::string name;
-  BulletConfig b;
-  
+
   while (fin >> name)
   {
-    fin >> b.SR >> b.CR >> b.S >> b.FR >> b.FG >> b.FB >> b.OR >> b.OG >> b.OB >> b.OT >> b.V >> b.L;
+    fin >> m_bulletConfig.SR >> m_bulletConfig.CR >> m_bulletConfig.S >> m_bulletConfig.FR >> m_bulletConfig.FG >> m_bulletConfig.FB >> m_bulletConfig.OR 
+        >> m_bulletConfig.OG >> m_bulletConfig.OB >> m_bulletConfig.OT >> m_bulletConfig.V >> m_bulletConfig.L;
   }
   
   // Calculate the velocity vector for the bullet based on mouse position relative to the player 
@@ -191,7 +197,7 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   std::cout << "D: " << D << std::endl;
   D.normalize();
   Vec2 N = D;
-  N *= b.S;
+  N *= m_bulletConfig.S;
   Vec2 velocity = N;
   
   auto bullet = m_entities.addEntity("bullet");
@@ -200,10 +206,15 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-  bullet->cShape = std::make_shared<CShape>(b.SR, b.V, 
-        sf::Color(b.FR, b.FG, b.FB),  
-        sf::Color(b.OR, b.OG, b.OB), b.OT);
+  bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
+        sf::Color(m_bulletConfig.FR, m_bulletConfig.FG, m_bulletConfig.FB),  
+        sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
 
+  // Give the bullet a collision component to detect collisions between bullets and enemies
+  bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR);
+
+  // Give the bullet a lifespan component 
+  bullet->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L, m_currentFrame);
 }
 
 void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
@@ -216,7 +227,6 @@ void Game::sMovement()
   // TODO: Implement all entity movement in this function 
   // you should read the m_player->cInput component to determine if the player is moving 
   Vec2 playerVelocity;
-  m_playerConfig.S = 0.1f;
 
   if (m_player->cInput->left)
   {
@@ -242,8 +252,49 @@ void Game::sMovement()
 
   for (auto e : m_entities.getEntities()) 
   {
-    e->cTransform->pos += e->cTransform->velocity;
+    if(e->tag() != "enemy")
+    {
+      e->cTransform->pos += e->cTransform->velocity;
+      if(e->cTransform->pos.x < 0)
+      {
+        e->cTransform->pos.x = 0;
+      }
+      if(e->cTransform->pos.x > m_window.getSize().x)
+      {
+        e->cTransform->pos.x = m_window.getSize().x;
+      }
+      if(e->cTransform->pos.y < 0)
+      {
+        e->cTransform->pos.y = 0;
+      }
+      if(e->cTransform->pos.y > m_window.getSize().y)
+      {
+        e->cTransform->pos.y = m_window.getSize().y;
+      }
+    }
   }
+  for (auto e : m_entities.getEntities("enemy")) 
+  {
+    e->cTransform->pos += e->cTransform->velocity;
+    if(e->cTransform->pos.x < 0)
+    {
+      e->cTransform->velocity.x *= -1;
+    }
+    if(e->cTransform->pos.x > m_window.getSize().x)
+    {
+      e->cTransform->velocity.x *= -1;
+    }
+    if(e->cTransform->pos.y < 0)
+    {
+      e->cTransform->velocity.y *= -1;
+    }
+    if(e->cTransform->pos.y > m_window.getSize().y)
+    {
+      e->cTransform->velocity.y *= -1;
+    }
+  }
+
+//  std::cout << "m_player velocity: " << m_player->cTransform->velocity << std::endl;
 
 }
 
@@ -254,9 +305,25 @@ void Game::sLifespan()
   //    if entity has no lifespan component, skip it 
   //    if entity has > 0 current lifespan, subtract 1 
   //    if it has lifespan and is alive 
-  auto color = m_player->cShape->circle.getFillColor();
-  int newAlpha = 100;
-  sf::Color newColor(color.r, color.g, color.b, newAlpha);
+
+  auto entities = m_entities.getEntities();
+  for (auto e : entities) 
+  {
+    if(e->cLifespan != nullptr) 
+    {
+      // int framesSinceSpawn = m_currentFrame - e->cLifespan->frameSpawned; 
+      e->cLifespan->remaining -= 1;
+      if(e->cLifespan->remaining < 0)
+      {
+        e->destroy();
+      }
+    }
+  }
+
+
+  //auto color = m_player->cShape->circle.getFillColor();
+  // int newAlpha = 100;
+  // sf::Color newColor(color.r, color.g, color.b, newAlpha);
   //         scale its alpha channel properly 
   //    if it has lifespan and its time is up 
   //         destroy the entity 
@@ -264,13 +331,28 @@ void Game::sLifespan()
 
 void Game::sCollision()
 {
-  for (auto p : m_entities.getEntities("player"))
+  // Detect collisions between the player and enemies 
+    for (auto e : m_entities.getEntities("enemy"))
+    {
+      // if there's a collision between p and e 
+      if ( abs(e->cTransform->pos.x - m_player->cTransform->pos.x) < e->cCollision->radius + m_player->cCollision->radius && 
+            abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
+      {
+        e->destroy();
+      }
+    }
+  // Detetc collisions between enemies and bullets
+  for (auto b : m_entities.getEntities("bullet"))
   {
     for (auto e : m_entities.getEntities("enemy"))
     {
-      // if there's a collision between pe, and e 
-      // float dist = p->cTransform->pos.dist(e->cTransform->pos);
-      // p->cCollision->radius;
+      // if there's a collision between b and e 
+      if ( abs(e->cTransform->pos.x - b->cTransform->pos.x) < e->cCollision->radius + b->cCollision->radius && 
+            abs(e->cTransform->pos.y - b->cTransform->pos.y) < e->cCollision->radius + b->cCollision->radius)
+      {
+        e->destroy();
+        b->destroy();
+      }
     }
   }
 }
@@ -315,25 +397,21 @@ void Game::sUserInput()
       {
         case sf::Keyboard::W:
           std::cout << "W Key Pressed\n";
-          // TODO: set player's input component "up" variable to true 
           m_player->cInput->up = true;
           break;
 
         case sf::Keyboard::S:
           std::cout << "S Key Pressed\n";
-          // TODO: set player's input component "up" variable to true 
           m_player->cInput->down = true;
           break;
 
         case sf::Keyboard::A:
           std::cout << "A Key Pressed\n";
-          // TODO: set player's input component "up" variable to true 
           m_player->cInput->left = true;
           break;
 
         case sf::Keyboard::D:
           std::cout << "D Key Pressed\n";
-          // TODO: set player's input component "up" variable to true 
           m_player->cInput->right = true;
           break;
       }
@@ -372,23 +450,16 @@ void Game::sUserInput()
       {
         std::cout << "Left Mouse Button Clicked at (" << event.mouseButton.x << ", " 
                                                       << event.mouseButton.y << ")\n";
-        // for (auto e : m_entities.getEntities())
-        // {
-        //  std::cout << "id: " << e->id() << " tag: " << e->tag() << std::endl;
-        // }
 
+        // call spawnBullet here 
         Vec2 mouse_pos(event.mouseButton.x, event.mouseButton.y);
         spawnBullet(m_player, mouse_pos);
-        // call spawnBullet here 
       }
 
       if (event.mouseButton.button == sf::Mouse::Right)
       {
         std::cout << "Right Mouse Button Clicked at (" << event.mouseButton.x << ", "
                                                        << event.mouseButton.y << ")\n";
-        auto entities = m_entities.getEntities("enemy");
-        entities.back()->destroy();
-        // call spawnSpecialWeapon here
       }
     }
   }
