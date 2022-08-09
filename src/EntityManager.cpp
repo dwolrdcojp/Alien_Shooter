@@ -8,7 +8,14 @@ void EntityManager::removeDeadEntities(EntityVec & vec)
     if(!it->get()->isActive()) 
     {
       vec.erase(it);
-      it = vec.begin();
+      if(!vec.empty())
+      {
+        it = vec.begin();
+      }
+      else 
+      {
+        break;
+      }
     }
   }
 }
@@ -31,7 +38,8 @@ void EntityManager::update()
     m_entities.push_back(e);
     m_entityMap[e->tag()].push_back(e);
   }
-
+  
+  m_entitiesToAdd.clear();
   // remove dead entities from the vector of all entities 
   removeDeadEntities(m_entities);
 
@@ -41,6 +49,7 @@ void EntityManager::update()
   {
     removeDeadEntities(entityVec);
   }
+
 
 }
 

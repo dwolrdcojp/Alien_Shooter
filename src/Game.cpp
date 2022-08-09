@@ -18,7 +18,7 @@ Game::Game(const std::string & config)
 
 void Game::init(const std::string & config)
 {
-  // TODO: Read in config file here 
+  //  Read in config file here 
   //       use the premade PlayerConfig, EnemyConfig, BulletConfig variables
   
   // Read in the window size 
@@ -50,8 +50,16 @@ void Game::run()
   // TODO: add pause functionality in here 
   //       some systems should function while paused (rendering)
   //       some systems shouldn't (movement / input)
+  sf::Clock clock;
   while (m_running)
   {
+    // Compute the frame rate 
+    float currentTime = clock.restart().asSeconds();
+    float fps = 1.0f / (currentTime);
+    
+    // output for showing frames per second on the console
+    // std::cout << "fps: " << fps << std::endl;
+
     m_entities.update();
 
     if(!m_paused)
@@ -60,7 +68,10 @@ void Game::run()
     }
       // if paused only run these systems  
       sMovement();
-      sCollision();
+      if(m_currentFrame > 120) 
+      {
+        sCollision();
+      }
       sUserInput();
       sLifespan();
       sRender();
@@ -71,8 +82,6 @@ void Game::run()
 }
 void Game::spawnPlayer()
 {
-  // TODO: Finish adding all the properties of the player with the correct values from the config 
-  //       Then use those in the constructor of the player components 
   // We create every entity by calling EntityManager.addEntity(tag) 
   // This returns a std::shared_ptr<Entity>, so we use 'auto' to save typing 
   std::ifstream fin("../assets/config/player.txt");
@@ -107,10 +116,6 @@ void Game::spawnPlayer()
 
 void Game::spawnEnemy() 
 {
-  // TODO: make sure the enemy is spawned properly with the m_enemyConfig variables
-  //       the enemy must be spawned completely within the bounds of the window 
-
-  // EnemyConfig  { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
   std::ifstream fin("../assets/config/enemy.txt");
 
   std::string name;
@@ -136,7 +141,7 @@ void Game::spawnEnemy()
     float rand_num_y = (std::rand() % 720);
 
     // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-    entity->cTransform = std::make_shared<CTransform>(Vec2(rand_num_x, rand_num_y), Vec2(0.1f, 0.1f), 0.0f);
+    entity->cTransform = std::make_shared<CTransform>(Vec2(rand_num_x, rand_num_y), Vec2(5.0f, 5.0f), 0.0f);
 
     // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
     entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
@@ -175,13 +180,12 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
 {
   // entity is the entity shooting the bullet (typically the player) 
   // target is the mouse position 
-  // TODO spawns a bullet from a given entity to a target location 
+  // spawns a bullet from a given entity to a target location 
   // implement the spawning of a bullet which travels towards a target 
   // -- bullet speed is given as a scalar speed 
   // -- you must set the velocity by using formula in notes
   // bring in all the of the BulletConfig attributes from the bullet config file 
-  // 
-   // Bullet 10 10 20 255 255 255 255 255 255 20 90
+
   std::ifstream fin("../assets/config/bullet.txt");
 
   std::string name;
@@ -194,7 +198,6 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   
   // Calculate the velocity vector for the bullet based on mouse position relative to the player 
   Vec2 D(target.x - entity->cTransform->pos.x, target.y - entity->cTransform->pos.y);
-  std::cout << "D: " << D << std::endl;
   D.normalize();
   Vec2 N = D;
   N *= m_bulletConfig.S;
@@ -224,8 +227,6 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
 
 void Game::sMovement()
 {
-  // TODO: Implement all entity movement in this function 
-  // you should read the m_player->cInput component to determine if the player is moving 
   Vec2 playerVelocity;
 
   if (m_player->cInput->left)
@@ -294,7 +295,6 @@ void Game::sMovement()
     }
   }
 
-//  std::cout << "m_player velocity: " << m_player->cTransform->velocity << std::endl;
 
 }
 
@@ -311,7 +311,8 @@ void Game::sLifespan()
   {
     if(e->cLifespan != nullptr) 
     {
-      // int framesSinceSpawn = m_currentFrame - e->cLifespan->frameSpawned; 
+      // output for showing entities lifespan on the console 
+      // std::cout << "lifespan: " << e->cLifespan->remaining << std::endl;
       e->cLifespan->remaining -= 1;
       if(e->cLifespan->remaining < 0)
       {
@@ -338,7 +339,7 @@ void Game::sCollision()
       if ( abs(e->cTransform->pos.x - m_player->cTransform->pos.x) < e->cCollision->radius + m_player->cCollision->radius && 
             abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
       {
-        e->destroy();
+        m_player->destroy();
       }
     }
   // Detetc collisions between enemies and bullets
@@ -359,8 +360,6 @@ void Game::sCollision()
 
 void Game::sRender()
 {
-  // TODO: change the code below to draw all of the Entities
-  // sample drawing of the player Entity we have created 
   // set the players rotation angle to change on each update
   m_player->cTransform->angle += 5.0f;
   // Draw enemies 
@@ -376,11 +375,6 @@ void Game::sRender()
 
 void Game::sUserInput()
 {
-  // TODO: handle user input here 
-  //       note that should only be setting the player's input component variables heere 
-  //       should not implement the player's movement logic here 
-  //       the movement system will read the variables you set in this function 
-
   sf::Event event;
   while (m_window.pollEvent(event))
   {
