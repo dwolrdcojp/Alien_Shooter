@@ -177,6 +177,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
     smallEnemy->cShape->circle.setRadius(radius / 2.0f);
 
     smallEnemy->cCollision = std::make_shared<CCollision>(smallEnemy->cShape->circle.getRadius());
+
+    smallEnemy->cLifespan = std::make_shared<CLifespan>(120, m_currentFrame);
     // smallEnemy->cScore = std::make_shared<CScore>(e->cScore->score*2);
   }
 
@@ -322,18 +324,21 @@ void Game::sLifespan()
   auto entities = m_entities.getEntities();
   for (auto e : entities) 
   {
-    if(e->cLifespan != nullptr) 
-    {
+    if(!e->cLifespan) { continue; }
       // output for showing entities lifespan on the console 
       // std::cout << "lifespan: " << e->cLifespan->remaining << std::endl;
+      
       e->cLifespan->remaining -= 1;
+      auto current_color = e->cShape->circle.getOutlineColor();
+      float current_percent = static_cast<float>(e->cLifespan->remaining) /  static_cast<float>(e->cLifespan->total);
+      current_color.a = 255 * current_percent;
+      auto new_color = sf::Color(current_color.r, current_color.g, current_color.b, current_color.a);
+      e->cShape->circle.setOutlineColor(new_color);
       if(e->cLifespan->remaining < 0)
       {
         e->destroy();
       }
-    }
   }
-
 
   //auto color = m_player->cShape->circle.getFillColor();
   // int newAlpha = 100;

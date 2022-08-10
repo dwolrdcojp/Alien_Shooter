@@ -18,6 +18,11 @@
  _X_ Implement the EntityManager::getEntities(tag) functionality 
  _X_ Implement collisions in sCollision and entity.destroy() if it's dead 
  _X_ Implement the rest of the game's functionality, including config file reading 
- ___ Implement smaller enemies spawning after large enemies are destroyed 
+ _X_ Implement smaller enemies spawning after large enemies are destroyed 
+ _X_ Implement Lifespan visual shown with fading color alpha property
  ___ Implement special weapon
+ ___ Implement pause button
+ ___ Implement restart if player dies
+ ___ Implement enemy spawner
+ ___ Implement score components on enemies and display player's score 
  ___ Implement Game Scenes
