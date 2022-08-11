@@ -370,6 +370,18 @@ void Game::sCollision()
         m_player->destroy();
       }
     }
+    
+    // Restart the game if the player dies
+    if(!m_player->isActive())
+    {
+      for (auto e : m_entities.getEntities())
+      {
+        e->destroy();
+      }
+      spawnPlayer();
+      spawnEnemy();
+    }
+
   // Detetc collisions between enemies and bullets
   for (auto b : m_entities.getEntities("bullet"))
   {

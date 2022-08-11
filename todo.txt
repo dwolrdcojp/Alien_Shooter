@@ -21,8 +21,8 @@
  _X_ Implement smaller enemies spawning after large enemies are destroyed 
  _X_ Implement Lifespan visual shown with fading color alpha property
  ___ Implement special weapon
- ___ Implement pause button
- ___ Implement restart if player dies
+ _X_ Implement pause button
+ _X_ Implement restart if player dies
  ___ Implement enemy spawner
  ___ Implement score components on enemies and display player's score 
  ___ Implement Game Scenes
