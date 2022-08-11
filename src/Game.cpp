@@ -73,6 +73,7 @@ void Game::run()
       {
         sCollision();
       }
+      sSpecialWeapon();
       sLifespan();
       sRender();
       // increment the current frame
@@ -153,7 +154,7 @@ void Game::spawnEnemy()
 
   // The entity's shape will have radius, sides, fill color, outline color, and thickness 
   entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
-      sf::Color(0, 0, 0), 
+      sf::Color(e.OR, e.OG, e.OB), 
       sf::Color(e.OR, e.OG, e.OB), e.OT);
 
   // Give the enemies a collision component so that we can detetc collision with the player and bullets
@@ -288,6 +289,7 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
     // Give the bullet a lifespan component 
     bullet->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L, m_currentFrame);
   }
+  m_specialUsed++;
 }
 
 void Game::sMovement()
@@ -368,12 +370,7 @@ void Game::sMovement()
 
 void Game::sLifespan()
 {
-  // TODO: implement all lifespan functionality
-  // for all entities
-  //    if entity has no lifespan component, skip it 
-  //    if entity has > 0 current lifespan, subtract 1 
-  //    if it has lifespan and is alive 
-
+  // Loop through all entities and update lifespan and update alpha color if there is a lifespan component
   auto entities = m_entities.getEntities();
   for (auto e : entities) 
   {
@@ -386,19 +383,13 @@ void Game::sLifespan()
       float current_percent = static_cast<float>(e->cLifespan->remaining) /  static_cast<float>(e->cLifespan->total);
       current_color.a = 255 * current_percent;
       auto new_color = sf::Color(current_color.r, current_color.g, current_color.b, current_color.a);
+      e->cShape->circle.setFillColor(new_color);
       e->cShape->circle.setOutlineColor(new_color);
       if(e->cLifespan->remaining < 0)
       {
         e->destroy();
       }
   }
-
-  //auto color = m_player->cShape->circle.getFillColor();
-  // int newAlpha = 100;
-  // sf::Color newColor(color.r, color.g, color.b, newAlpha);
-  //         scale its alpha channel properly 
-  //    if it has lifespan and its time is up 
-  //         destroy the entity 
 }
 
 void Game::sCollision()
@@ -431,6 +422,8 @@ void Game::sCollision()
         e->destroy();
       }
       m_score = 0;
+      m_specialUsed = 0;
+      m_specialAvailable = 0;
       spawnPlayer();
       spawnEnemy();
     }
@@ -468,6 +461,15 @@ void Game::sCollision()
   }
 }
 
+void Game::sSpecialWeapon()
+{
+  m_specialTotal = m_score / 50;
+
+  m_specialAvailable = m_specialTotal - m_specialUsed;
+
+}
+
+
 void Game::sRender()
 {
   // Set up the score font and text 
@@ -479,6 +481,8 @@ void Game::sRender()
   m_text.setFont(m_font);
   std::string score = " Score: ";
   score += std::to_string(m_score);
+  score += "    Special: ";
+  score += std::to_string(m_specialAvailable);
   m_text.setString(score);
   m_text.setCharacterSize(24);
   m_text.setStyle(sf::Text::Bold);
@@ -601,7 +605,7 @@ void Game::sUserInput()
       {
         std::cout << "Right Mouse Button Clicked at (" << event.mouseButton.x << ", "
                                                        << event.mouseButton.y << ")\n";
-        if(!m_paused)
+        if(!m_paused && m_specialAvailable > 0)
         {
           spawnSpecialWeapon(m_player);
         }

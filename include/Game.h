@@ -60,6 +60,9 @@ private:
   EnemyConfig      m_enemyConfig;
   BulletConfig     m_bulletConfig;
   int              m_score = 0;
+  int              m_specialTotal = 0;
+  int              m_specialUsed = 0;
+  int              m_specialAvailable = 0;
   int              m_currentFrame = 0;
   int              m_lastEnemySpawnTime = 0;
   int              m_currentEnemy = 0;
@@ -78,6 +81,7 @@ private:
   void sRender();
   void sEnemySpawner();
   void sCollision();
+  void sSpecialWeapon();
 
   void spawnPlayer();
   void spawnEnemy();

@@ -25,4 +25,5 @@
  _X_ Implement restart if player dies
  _X_ Implement enemy spawner
  _X_ Implement score components on enemies and display player's score 
+ _X_ Implement reload charge for special weapon and display visual when ready
  ___ Implement Game Scenes
