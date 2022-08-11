@@ -151,13 +151,15 @@ void Game::spawnEnemy()
   // Give this entity a Transform so it spawns at random x, y within sceen resolution and random velocity between (-5, -5) and (5, 5)  
   entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0.0f);
 
-  // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+  // The entity's shape will have radius, sides, fill color, outline color, and thickness 
   entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
       sf::Color(0, 0, 0), 
       sf::Color(e.OR, e.OG, e.OB), e.OT);
 
   // Give the enemies a collision component so that we can detetc collision with the player and bullets
   entity->cCollision = std::make_shared<CCollision>(e.SR);    
+
+  entity->cScore = std::make_shared<CScore>(e.VMIN);
 
   // record when the most recent enemy was spawned 
   m_lastEnemySpawnTime = m_currentFrame; 
@@ -186,7 +188,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
     smallEnemy->cCollision = std::make_shared<CCollision>(smallEnemy->cShape->circle.getRadius());
 
     smallEnemy->cLifespan = std::make_shared<CLifespan>(120, m_currentFrame);
-    // smallEnemy->cScore = std::make_shared<CScore>(e->cScore->score*2);
+    smallEnemy->cScore = std::make_shared<CScore>(e->cScore->score*2);
   }
 
   // When we create the smaller enemy, we have to read the values of the original enemy 
@@ -428,6 +430,7 @@ void Game::sCollision()
       {
         e->destroy();
       }
+      m_score = 0;
       spawnPlayer();
       spawnEnemy();
     }
@@ -442,6 +445,7 @@ void Game::sCollision()
             abs(e->cTransform->pos.y - b->cTransform->pos.y) < e->cCollision->radius + b->cCollision->radius)
       {
         spawnSmallEnemies(e);
+        m_score += e->cScore->score;
         e->destroy();
         b->destroy();
       }
@@ -456,6 +460,7 @@ void Game::sCollision()
       if ( abs(e->cTransform->pos.x - b->cTransform->pos.x) < e->cCollision->radius + b->cCollision->radius && 
             abs(e->cTransform->pos.y - b->cTransform->pos.y) < e->cCollision->radius + b->cCollision->radius)
       {
+        m_score += e->cScore->score;
         e->destroy();
         b->destroy();
       }
@@ -465,6 +470,20 @@ void Game::sCollision()
 
 void Game::sRender()
 {
+  // Set up the score font and text 
+  if (!m_font.loadFromFile("../assets/fonts/Roboto-Light.ttf"))
+  {
+    std::cout << "Error loading font..." << std::endl;
+  }
+
+  m_text.setFont(m_font);
+  std::string score = " Score: ";
+  score += std::to_string(m_score);
+  m_text.setString(score);
+  m_text.setCharacterSize(24);
+  m_text.setStyle(sf::Text::Bold);
+  m_text.setFillColor(sf::Color::White);
+
   // set the players rotation angle to change on each update
   m_player->cTransform->angle += 5.0f;
   // Draw enemies 
@@ -479,6 +498,7 @@ void Game::sRender()
     e->cShape->circle.setRotation(e->cTransform->angle);
     m_window.draw(e->cShape->circle);
   }
+  m_window.draw(m_text);
   m_window.display();
 }
 
