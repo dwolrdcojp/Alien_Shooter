@@ -64,22 +64,23 @@ void Game::run()
 
     m_entities.update();
 
+    // systems to run while not paused
     if(!m_paused)
     {
       // sEnemySpawner();
-    }
-      // if paused only run these systems  
       sMovement();
       if(m_currentFrame > 120) 
       {
         sCollision();
       }
-      sUserInput();
       sLifespan();
       sRender();
-    // increment the current frame 
-    // may need to be moved when pause implemented 
-    m_currentFrame++;
+      // increment the current frame
+      m_currentFrame++;
+    }
+
+    // if paused only run these systems  
+    sUserInput();
   }
 }
 void Game::spawnPlayer()
@@ -454,6 +455,11 @@ void Game::sUserInput()
           std::cout << "D Key Pressed\n";
           m_player->cInput->right = true;
           break;
+
+        case sf::Keyboard::Escape:
+          std::cout << "Game paused" << std::endl;
+          m_paused = !m_paused;
+          break;
       }
     }
 
@@ -493,7 +499,10 @@ void Game::sUserInput()
 
         // call spawnBullet here 
         Vec2 mouse_pos(event.mouseButton.x, event.mouseButton.y);
-        spawnBullet(m_player, mouse_pos);
+        if(!m_paused)
+        {
+          spawnBullet(m_player, mouse_pos);
+        }
       }
 
       if (event.mouseButton.button == sf::Mouse::Right)
