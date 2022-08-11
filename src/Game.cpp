@@ -242,6 +242,50 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
 void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
 {
   // TODO: implement a special weapon
+  std::ifstream fin("../assets/config/bullet.txt");
+
+  std::string name;
+
+  while (fin >> name)
+  {
+    fin >> m_bulletConfig.SR >> m_bulletConfig.CR >> m_bulletConfig.S >> m_bulletConfig.FR >> m_bulletConfig.FG >> m_bulletConfig.FB >> m_bulletConfig.OR 
+        >> m_bulletConfig.OG >> m_bulletConfig.OB >> m_bulletConfig.OT >> m_bulletConfig.V >> m_bulletConfig.L;
+  }
+  
+  // Calculate the velocity vector for the bullet based on mouse position relative to the player 
+  /*
+  Vec2 D(target.x - entity->cTransform->pos.x, target.y - entity->cTransform->pos.y);
+  D.normalize();
+  Vec2 N = D;
+  N *= m_bulletConfig.S;
+  Vec2 velocity = N;
+  */
+   
+  std::vector<Vec2> velocities{ Vec2(0, -1), Vec2(0, 1), Vec2(1, 0), Vec2(1, 1), Vec2(1, -1), Vec2(-1, -1), Vec2(-1, 0), Vec2(-1, 1) };
+
+  for (auto v : velocities)
+  {
+    v.normalize();
+    Vec2 N = v;
+    N *= m_bulletConfig.S;
+    Vec2 velocity = N;
+
+    auto bullet = m_entities.addEntity("bullet");
+
+    // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
+    bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
+
+    // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+    bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
+          sf::Color(m_bulletConfig.FR, m_bulletConfig.FG, m_bulletConfig.FB),  
+          sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
+
+    // Give the bullet a collision component to detect collisions between bullets and enemies
+    bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR);
+
+    // Give the bullet a lifespan component 
+    bullet->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L, m_currentFrame);
+  }
 }
 
 void Game::sMovement()
@@ -537,6 +581,10 @@ void Game::sUserInput()
       {
         std::cout << "Right Mouse Button Clicked at (" << event.mouseButton.x << ", "
                                                        << event.mouseButton.y << ")\n";
+        if(!m_paused)
+        {
+          spawnSpecialWeapon(m_player);
+        }
       }
     }
   }

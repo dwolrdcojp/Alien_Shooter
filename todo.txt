@@ -20,9 +20,9 @@
  _X_ Implement the rest of the game's functionality, including config file reading 
  _X_ Implement smaller enemies spawning after large enemies are destroyed 
  _X_ Implement Lifespan visual shown with fading color alpha property
- ___ Implement special weapon
+ _X_ Implement special weapon
  _X_ Implement pause button
  _X_ Implement restart if player dies
- ___ Implement enemy spawner
+ _X_ Implement enemy spawner
  ___ Implement score components on enemies and display player's score 
  ___ Implement Game Scenes
