@@ -67,7 +67,7 @@ void Game::run()
     // systems to run while not paused
     if(!m_paused)
     {
-      // sEnemySpawner();
+      sEnemySpawner();
       sMovement();
       if(m_currentFrame > 120) 
       {
@@ -133,28 +133,34 @@ void Game::spawnEnemy()
     enemies.push_back(ec);
   }
 
+  // Change to the next enemy in the enemy config file each call of spawnEnemy
+  int enemy_counter = enemies.size();
+  if(m_currentEnemy < enemy_counter)
+  {
+    m_currentEnemy++;
+  } else 
+  {
+    m_currentEnemy = 0;
+  }
+
+  auto e = enemies[m_currentEnemy];
 
   // Add enemey entities and construct properties & by the number of enemies in the enemy config data 
-  for (auto e : enemies)
-  {
-    auto entity = m_entities.addEntity("enemy");
+  auto entity = m_entities.addEntity("enemy");
 
+  // Give this entity a Transform so it spawns at random x, y within sceen resolution and random velocity between (-5, -5) and (5, 5)  
+  entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0.0f);
 
-    // Give this entity a Transform so it spawns at random x, y within sceen resolution and random velocity between (-5, -5) and (5, 5)  
-    entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0.0f);
+  // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
+  entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
+      sf::Color(0, 0, 0), 
+      sf::Color(e.OR, e.OG, e.OB), e.OT);
 
-    // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
-    entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
-        sf::Color(0, 0, 0), 
-        sf::Color(e.OR, e.OG, e.OB), e.OT);
+  // Give the enemies a collision component so that we can detetc collision with the player and bullets
+  entity->cCollision = std::make_shared<CCollision>(e.SR);    
 
-    // Give the enemies a collision component so that we can detetc collision with the player and bullets
-    entity->cCollision = std::make_shared<CCollision>(e.SR);    
-
-    // record when the most recent enemy was spawned 
-    m_lastEnemySpawnTime = m_currentFrame; 
-
-  }
+  // record when the most recent enemy was spawned 
+  m_lastEnemySpawnTime = m_currentFrame; 
 
 }
 
@@ -430,6 +436,16 @@ void Game::sRender()
     m_window.draw(e->cShape->circle);
   }
   m_window.display();
+}
+
+void Game::sEnemySpawner()
+{
+
+  if(m_currentFrame - m_lastEnemySpawnTime > 120)
+  {
+    spawnEnemy();
+  }
+
 }
 
 void Game::sUserInput()
