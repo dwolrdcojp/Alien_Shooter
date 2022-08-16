@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2018 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,82 +22,93 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_THREADLOCAL_HPP
-#define SFML_THREADLOCAL_HPP
+#ifndef SFML_VULKAN_HPP
+#define SFML_VULKAN_HPP
 
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/System/Export.hpp>
-#include <SFML/System/NonCopyable.hpp>
-#include <cstdlib>
+#include <SFML/Window/Export.hpp>
+
+#include <cstdint>
+#include <vector>
+
+
+using VkInstance = struct VkInstance_T*;
+
+#if defined(__LP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__)) || defined(_M_X64) || \
+    defined(__ia64) || defined(_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+
+using VkSurfaceKHR = struct VkSurfaceKHR_T*;
+
+#else
+
+using VkSurfaceKHR = std::uint64_t;
+
+#endif
+
+struct VkAllocationCallbacks;
 
 
 namespace sf
 {
-namespace priv
-{
-    class ThreadLocalImpl;
-}
+
+using VulkanFunctionPointer = void (*)();
 
 ////////////////////////////////////////////////////////////
-/// \brief Defines variables with thread-local storage
+/// \brief Vulkan helper functions
 ///
 ////////////////////////////////////////////////////////////
-class SFML_SYSTEM_API ThreadLocal : NonCopyable
+class SFML_WINDOW_API Vulkan
 {
 public:
+    ////////////////////////////////////////////////////////////
+    /// \brief Tell whether or not the system supports Vulkan
+    ///
+    /// This function should always be called before using
+    /// the Vulkan features. If it returns false, then
+    /// any attempt to use Vulkan will fail.
+    ///
+    /// If only compute is required, set \a requireGraphics
+    /// to false to skip checking for the extensions necessary
+    /// for graphics rendering.
+    ///
+    /// \param requireGraphics
+    ///
+    /// \return True if Vulkan is supported, false otherwise
+    ///
+    ////////////////////////////////////////////////////////////
+    static bool isAvailable(bool requireGraphics = true);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
+    /// \brief Get the address of a Vulkan function
     ///
-    /// \param value Optional value to initialize the variable
+    /// \param name Name of the function to get the address of
+    ///
+    /// \return Address of the Vulkan function, 0 on failure
     ///
     ////////////////////////////////////////////////////////////
-    ThreadLocal(void* value = NULL);
+    static VulkanFunctionPointer getFunction(const char* name);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Destructor
+    /// \brief Get Vulkan instance extensions required for graphics
+    ///
+    /// \return Vulkan instance extensions required for graphics
     ///
     ////////////////////////////////////////////////////////////
-    ~ThreadLocal();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the thread-specific value of the variable
-    ///
-    /// \param value Value of the variable for the current thread
-    ///
-    ////////////////////////////////////////////////////////////
-    void setValue(void* value);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Retrieve the thread-specific value of the variable
-    ///
-    /// \return Value of the variable for the current thread
-    ///
-    ////////////////////////////////////////////////////////////
-    void* getValue() const;
-
-private:
-
-    ////////////////////////////////////////////////////////////
-    // Member data
-    ////////////////////////////////////////////////////////////
-    priv::ThreadLocalImpl* m_impl; ///< Pointer to the OS specific implementation
+    static const std::vector<const char*>& getGraphicsRequiredInstanceExtensions();
 };
 
 } // namespace sf
 
 
-#endif // SFML_THREADLOCAL_HPP
+#endif // SFML_VULKAN_HPP
 
 
 ////////////////////////////////////////////////////////////
-/// \class sf::ThreadLocal
-/// \ingroup system
+/// \class sf::Vulkan
+/// \ingroup window
 ///
-/// This class manipulates void* parameters and thus is not
-/// appropriate for strongly-typed variables. You should rather
-/// use the sf::ThreadLocalPtr template class.
+///
 ///
 ////////////////////////////////////////////////////////////
