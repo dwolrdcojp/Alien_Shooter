@@ -37,9 +37,8 @@ void Game::init(const std::string & config)
     fin >> x >> y >> fps;
   }
 
-  sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-  sf::Vector2u resolution = sf::Vector2u(x, y);
-  m_window.create(sf::VideoMode(resolution, desktop.bitsPerPixel), "Alien Shooter");
+   /// // Display the list of all the video modes available for fullscreen
+  m_window.create(sf::VideoMode(x, y), "Alien Shooter");
   m_window.setFramerateLimit(60);
 
   spawnPlayer();
@@ -102,7 +101,7 @@ void Game::spawnPlayer()
   auto entity = m_entities.addEntity("player");
 
   // Give this entity a Transform so it spawns at (200, 200) with velocity of (1, 1) and angle 0 
-  entity->cTransform = std::make_shared<CTransform>(Vec2(200.0f, 200.0f), Vec2(0.0f, 0.0f), sf::degrees(0));
+  entity->cTransform = std::make_shared<CTransform>(Vec2(200.0f, 200.0f), Vec2(0.0f, 0.0f), 0);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
   entity->cShape = std::make_shared<CShape>(m_playerConfig.SR, m_playerConfig.V, 
@@ -152,7 +151,7 @@ void Game::spawnEnemy()
   auto entity = m_entities.addEntity("enemy");
 
   // Give this entity a Transform so it spawns at random x, y within sceen resolution and random velocity between (-5, -5) and (5, 5)  
-  entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), sf::degrees(0));
+  entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0);
 
   // The entity's shape will have radius, sides, fill color, outline color, and thickness 
   entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
@@ -178,7 +177,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
   for (int i = 0; i < vertices; i++)
   {
     auto smallEnemy = m_entities.addEntity("small");
-    smallEnemy->cTransform = std::make_shared<CTransform>(e->cTransform->pos, Vec2( (rand() % 10)-5.1, (rand() % 10) -5.1), sf::degrees(0));
+    smallEnemy->cTransform = std::make_shared<CTransform>(e->cTransform->pos, Vec2( (rand() % 10)-5.1, (rand() % 10) -5.1), 0);
 
     smallEnemy->cShape = std::make_shared<CShape>(e->cShape->circle.getRadius(), 
                                                   e->cShape->circle.getPointCount(), 
@@ -230,7 +229,7 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
   auto bullet = m_entities.addEntity("bullet");
 
   // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-  bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, sf::degrees(0));
+  bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
 
   // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
   bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
@@ -278,7 +277,7 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
     auto bullet = m_entities.addEntity("bullet");
 
     // Give this entity a Transform so it spawns at (400, 400) with velocity of (0, 0) and angle 0 
-    bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, sf::degrees(0));
+    bullet->cTransform = std::make_shared<CTransform>(entity->cTransform->pos, velocity, 0.0f);
 
     // The entity's shape will have radius 32, 8 sides, dark grey fill, and red outline of thickness 4 
     bullet->cShape = std::make_shared<CShape>(m_bulletConfig.SR, m_bulletConfig.V, 
@@ -491,16 +490,14 @@ void Game::sRender()
   m_text.setFillColor(sf::Color::White);
 
   // set the players rotation angle to change on each update
-  sf::Angle a1 = sf::degrees(5);
-  m_player->cTransform->angle += a1;
+  m_player->cTransform->angle += 5.0f;
   // Draw enemies 
   m_window.clear();
   for (auto e : m_entities.getEntities())
   {
     if(e->tag() != "player")
     {
-      sf::Angle a = sf::degrees(3);
-      e->cTransform->angle += a;
+      e->cTransform->angle += 3.0f;
     }
     e->cShape->circle.setPosition(sf::Vector2f(e->cTransform->pos.x, e->cTransform->pos.y));
     e->cShape->circle.setRotation(e->cTransform->angle);
