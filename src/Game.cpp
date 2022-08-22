@@ -403,6 +403,7 @@ void Game::sCollision()
             abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
       {
         m_player->destroy();
+        m_sound.playPlayerExplode();
       }
     }
     for (auto e : m_entities.getEntities("small"))
@@ -412,6 +413,7 @@ void Game::sCollision()
             abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
       {
         m_player->destroy();
+        m_sound.playPlayerExplode();
       }
     }
     
@@ -442,6 +444,7 @@ void Game::sCollision()
         m_score += e->cScore->score;
         e->destroy();
         b->destroy();
+        m_sound.playEnemyExplode();
       }
     }
   }
@@ -457,6 +460,7 @@ void Game::sCollision()
         m_score += e->cScore->score;
         e->destroy();
         b->destroy();
+        m_sound.playEnemyExplode();
       }
     }
   }
@@ -556,6 +560,7 @@ void Game::sUserInput()
         case sf::Keyboard::Escape:
           std::cout << "Game paused" << std::endl;
           m_paused = !m_paused;
+          m_sound.playClick();
           break;
       }
     }
@@ -599,6 +604,7 @@ void Game::sUserInput()
         if(!m_paused)
         {
           spawnBullet(m_player, mouse_pos);
+          m_sound.playShoot();
         }
       }
 
@@ -609,6 +615,7 @@ void Game::sUserInput()
         if(!m_paused && m_specialAvailable > 0)
         {
           spawnSpecialWeapon(m_player);
+          m_sound.playPowerup();
         }
       }
     }

@@ -53,6 +53,7 @@ private:
   
   // Private member variables
   sf::RenderWindow m_window;             // the window we will draw to
+  SoundEngine      m_sound;
   EntityManager    m_entities;           // vector of entities to maintain 
   sf::Font         m_font;               // the font we will use to draw 
   sf::Text         m_text;               // the score text to be drawn to the screen 
