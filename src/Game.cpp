@@ -41,6 +41,9 @@ void Game::init(const std::string & config)
   m_window.create(sf::VideoMode(x, y), "Alien Shooter");
   m_window.setFramerateLimit(60);
 
+  // Play background music 
+  m_sound.playMusic();
+
   spawnPlayer();
   spawnEnemy();
 
@@ -429,6 +432,8 @@ void Game::sCollision()
       m_specialAvailable = 0;
       spawnPlayer();
       spawnEnemy();
+      m_sound.stopMusic();
+      m_sound.playMusic();
     }
 
   // Detetc collisions between enemies and bullets
@@ -559,6 +564,14 @@ void Game::sUserInput()
 
         case sf::Keyboard::Escape:
           std::cout << "Game paused" << std::endl;
+          if(!m_paused) 
+          { 
+            m_sound.pauseMusic(); 
+          } else 
+          {
+            m_sound.playMusic();
+          }
+          
           m_paused = !m_paused;
           m_sound.playClick();
           break;

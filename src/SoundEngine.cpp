@@ -24,6 +24,9 @@ SoundEngine::SoundEngine()
 
   m_PowerupBuffer.loadFromFile("../assets/sounds/Powerup.wav");
   m_PowerupSound.setBuffer(m_PowerupBuffer);
+
+  m_Music.openFromFile("../assets/sounds/Music.wav");
+  m_Music.setLoop(true);
 }
 
 void SoundEngine::playShoot()
@@ -51,3 +54,17 @@ void SoundEngine::playPowerup()
   m_s_Instance->m_PowerupSound.play();
 }
 
+void SoundEngine::playMusic()
+{
+  m_s_Instance->m_Music.play();
+}
+
+void SoundEngine::stopMusic()
+{
+  m_s_Instance->m_Music.stop();
+}
+
+void SoundEngine::pauseMusic()
+{
+  m_s_Instance->m_Music.pause();
+}
