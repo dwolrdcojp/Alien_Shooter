@@ -33,8 +33,9 @@ class CCollision
 {
 public:
   float radius = 0;
-  CCollision(float r)
-    : radius(r) {}
+  int frameSpawned = 0;
+  CCollision(float r, int frame)
+    : radius(r), frameSpawned(frame) {}
 };
 
 class CScore

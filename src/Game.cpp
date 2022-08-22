@@ -115,7 +115,7 @@ void Game::spawnPlayer()
   entity->cInput = std::make_shared<CInput>();
 
   // Add a collision component to player so we can detect collisions with other enemies
-  entity->cCollision = std::make_shared<CCollision>(m_playerConfig.SR);
+  entity->cCollision = std::make_shared<CCollision>(m_playerConfig.SR, m_currentFrame);
 
   // Since we want this Entity to be our player, set our Game's player variable to be this Entity 
   // This goes slightly against the EntityManager paradigm, but we use the player so much it's worth it 
@@ -162,7 +162,7 @@ void Game::spawnEnemy()
       sf::Color(e.OR, e.OG, e.OB), e.OT);
 
   // Give the enemies a collision component so that we can detetc collision with the player and bullets
-  entity->cCollision = std::make_shared<CCollision>(e.SR);    
+  entity->cCollision = std::make_shared<CCollision>(e.SR, m_currentFrame);    
 
   entity->cScore = std::make_shared<CScore>(e.VMIN);
 
@@ -190,7 +190,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
     int radius = e->cShape->circle.getRadius();
     smallEnemy->cShape->circle.setRadius(radius / 2.0f);
 
-    smallEnemy->cCollision = std::make_shared<CCollision>(smallEnemy->cShape->circle.getRadius());
+    smallEnemy->cCollision = std::make_shared<CCollision>(smallEnemy->cShape->circle.getRadius(), m_currentFrame);
 
     smallEnemy->cLifespan = std::make_shared<CLifespan>(120, m_currentFrame);
     smallEnemy->cScore = std::make_shared<CScore>(e->cScore->score*2);
@@ -240,7 +240,7 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2 & target)
         sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
 
   // Give the bullet a collision component to detect collisions between bullets and enemies
-  bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR);
+  bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR, m_currentFrame);
 
   // Give the bullet a lifespan component 
   bullet->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L, m_currentFrame);
@@ -288,7 +288,7 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
           sf::Color(m_bulletConfig.OR, m_bulletConfig.OG, m_bulletConfig.OB), m_bulletConfig.OT);
 
     // Give the bullet a collision component to detect collisions between bullets and enemies
-    bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR);
+    bullet->cCollision = std::make_shared<CCollision>(m_bulletConfig.SR, m_currentFrame);
 
     // Give the bullet a lifespan component 
     bullet->cLifespan = std::make_shared<CLifespan>(m_bulletConfig.L, m_currentFrame);
@@ -405,8 +405,11 @@ void Game::sCollision()
       if ( abs(e->cTransform->pos.x - m_player->cTransform->pos.x) < e->cCollision->radius + m_player->cCollision->radius && 
             abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
       {
-        m_player->destroy();
-        m_sound.playPlayerExplode();
+        if( (m_currentFrame - e->cCollision->frameSpawned) > 60)
+        {
+           m_player->destroy();
+           m_sound.playPlayerExplode();
+        }
       }
     }
     for (auto e : m_entities.getEntities("small"))
@@ -415,8 +418,11 @@ void Game::sCollision()
       if ( abs(e->cTransform->pos.x - m_player->cTransform->pos.x) < e->cCollision->radius + m_player->cCollision->radius && 
             abs(e->cTransform->pos.y - m_player->cTransform->pos.y) < e->cCollision->radius + m_player->cCollision->radius)
       {
-        m_player->destroy();
-        m_sound.playPlayerExplode();
+        if( (m_currentFrame - e->cCollision->frameSpawned) > 60)
+        {
+          m_player->destroy();
+          m_sound.playPlayerExplode();
+        }
       }
     }
     
