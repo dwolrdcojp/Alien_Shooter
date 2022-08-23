@@ -13,6 +13,7 @@
 
 #include "Vec2.h"
 #include "SoundEngine.h"
+#include "TextureEngine.h"
 
 template <class T> using ptr = std::shared_ptr<T>;
 // equivalent ptr<t> == std::shared_ptr<T>

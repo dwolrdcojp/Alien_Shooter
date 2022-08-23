@@ -38,11 +38,20 @@ void Game::init(const std::string & config)
   }
 
    /// // Display the list of all the video modes available for fullscreen
-  m_window.create(sf::VideoMode(x, y), "Alien Shooter");
+  m_window.create(sf::VideoMode(x, y), "Alien Shooter", sf::Style::Fullscreen);
   m_window.setFramerateLimit(60);
 
   // Play background music 
   m_sound.playMusic();
+
+  // Add background image
+  m_textures.addTexture("../assets/graphics/earth.png");
+  m_textures.m_background.setTexture(m_textures.getTexture("../assets/graphics/earth.png"));
+
+  float scale_x = m_window.getSize().x / m_textures.m_background.getTexture()->getSize().x;
+  float scale_y = m_window.getSize().y / m_textures.m_background.getTexture()->getSize().y;
+
+  m_textures.m_background.setScale(sf::Vector2f(scale_x, scale_y));
 
   spawnPlayer();
   spawnEnemy();
@@ -152,9 +161,11 @@ void Game::spawnEnemy()
 
   // Add enemey entities and construct properties & by the number of enemies in the enemy config data 
   auto entity = m_entities.addEntity("enemy");
-
+  // Grab the screen's resolution to do create boundaries for spawning enemy
+  int window_x = m_window.getSize().x;
+  int window_y = m_window.getSize().y;
   // Give this entity a Transform so it spawns at random x, y within sceen resolution and random velocity between (-5, -5) and (5, 5)  
-  entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % 1280),(rand() % 720)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0);
+  entity->cTransform = std::make_shared<CTransform>(Vec2((rand() % window_x),(rand() % window_y)), Vec2((rand() % 10)-5.1, (rand() % 10) -5.1), 0);
 
   // The entity's shape will have radius, sides, fill color, outline color, and thickness 
   entity->cShape = std::make_shared<CShape>(e.SR, e.VMIN, 
@@ -506,8 +517,12 @@ void Game::sRender()
 
   // set the players rotation angle to change on each update
   m_player->cTransform->angle += 5.0f;
-  // Draw enemies 
+  // Draw player and enemies and bullets
   m_window.clear();
+
+  // Draw the background
+  m_window.draw(m_textures.m_background);
+
   for (auto e : m_entities.getEntities())
   {
     if(e->tag() != "player")
