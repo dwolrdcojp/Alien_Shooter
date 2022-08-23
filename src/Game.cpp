@@ -521,7 +521,27 @@ void Game::sRender()
   m_window.clear();
 
   // Draw the background
+  // Oscillate the amount of green in the background 
+  auto color = m_textures.m_background.getColor();
+
+  sf::Color new_color = color;
+  if(new_color.r == 192) { m_fade = false; }
+
+  if(m_fade)
+  {
+    new_color.r -= 1;
+    new_color.b -= 1;
+  }
+  else 
+  {
+    new_color.r += 1;
+    new_color.b += 1;
+    if(new_color.r == 255) { m_fade = true; }
+  }
+
+  m_textures.m_background.setColor(new_color);
   m_window.draw(m_textures.m_background);
+  // end drawing background
 
   for (auto e : m_entities.getEntities())
   {

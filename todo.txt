@@ -26,7 +26,7 @@
  _X_ Implement enemy spawner
  _X_ Implement score components on enemies and display player's score 
  _X_ Implement reload charge for special weapon and display visual when ready
- ___ Add Background image
+ _X_ Add Background image
  _X_ Add SoundEngine 
  _X_ Add background music 
  ___ Implement Game Scenes
