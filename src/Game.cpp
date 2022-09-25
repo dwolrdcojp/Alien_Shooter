@@ -38,7 +38,7 @@ void Game::init(const std::string & config)
   }
 
    /// // Display the list of all the video modes available for fullscreen
-  m_window.create(sf::VideoMode(x, y), "Alien Shooter", sf::Style::Fullscreen);
+  m_window.create(sf::VideoMode(x, y), "Alien Shooter", sf::Style::Default);
   m_window.setFramerateLimit(60);
 
   // Play background music 
@@ -48,8 +48,8 @@ void Game::init(const std::string & config)
   m_textures.addTexture("../assets/graphics/earth.png");
   m_textures.m_background.setTexture(m_textures.getTexture("../assets/graphics/earth.png"));
 
-  float scale_x = m_window.getSize().x / m_textures.m_background.getTexture()->getSize().x;
-  float scale_y = m_window.getSize().y / m_textures.m_background.getTexture()->getSize().y;
+  float scale_x = m_window.getSize().x / (float)m_textures.m_background.getTexture()->getSize().x;
+  float scale_y = m_window.getSize().y / (float)m_textures.m_background.getTexture()->getSize().y;
 
   m_textures.m_background.setScale(sf::Vector2f(scale_x, scale_y));
 
